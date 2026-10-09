@@ -11,6 +11,13 @@ local votes = {}
 zb.votestarted = false
 local playervote = {}
 
+
+--vvvvvvv  RIGHT HERE!!!! vvvvvvv
+--local whitelist = {
+	---["STEAM_0:0:541332957"] = true,
+--}
+--no more whitelist fellas ;(
+
 local mappull = {}
 local playerVoteWeight = {}
 
@@ -158,7 +165,13 @@ net.Receive("ZB_RockTheVote_vote", function(len, ply)
     if map ~= "random" and not table.HasValue(mappull, map) then return end
     playervote[playerIdx] = map
 
-    playerVoteWeight[playerIdx] = 1
+    local nitroNahuy = ply:query("ulx nitro")
+
+    if nitroNahuy then
+        playerVoteWeight[playerIdx] = 2
+    else
+        playerVoteWeight[playerIdx] = 1
+    end
 
     votes[map] = (votes[map] or 0) + playerVoteWeight[playerIdx]
 
