@@ -1,12 +1,13 @@
 local PANEL = {}
 local curent_panel 
-local red_select = Color(192,0,0)
+local red_select = Color(150,0,0)
 
-DISCORD_URL = "https://discord.gg/475EmEdTgH"
+DISCORD_URL = "https://discord.gg/k6CM2xWFkG"
 
 local Selects = {
     {Title = "Disconnect", Func = function(luaMenu) RunConsoleCommand("disconnect") end},
     {Title = "Main Menu", Func = function(luaMenu) gui.ActivateGameUI() luaMenu:Close() end},
+    --{Title = "Credits", Funch = function(luaMenu) luaMenu:Close() end},
     {Title = "Discord", Func = function(luaMenu) luaMenu:Close() gui.OpenURL(DISCORD_URL)  end},
     {Title = "Traitor Role",
     GamemodeOnly = true,
@@ -87,7 +88,7 @@ local splasheh = {
     'THE TRAITOR WAS KILLED',
     'NAB HOMICIDE SERVER',
     'ALSO TRY MODDED HOMICIDE 2',
-    'HOP ON Z-CITY',
+    'HOP ON H-CITY',
     'JOHN Z-CITY',
     ':pluvrare:',
     'SAW51 IS REAL',
@@ -100,7 +101,7 @@ local splasheh = {
 
 --print(string.upper('I wish you good health, Jason Statham'))
 surface.CreateFont("ZC_MM_Title", {
-    font = "Bahnschrift",
+    font = "Papyrus",
     size = ScreenScale(40),
     weight = 800,
     antialias = true
@@ -125,13 +126,14 @@ function PANEL:InitializeMarkup()
         return markup.Parse(text)
     end
 
-    local text = "<font=ZC_MM_Title><colour=199,2,2,255>Z</colour>-City</font>\n<font=ZCity_Tiny><colour=105,105,105>" .. gm .. "</colour></font>"
+    local text = "<font=ZC_MM_Title><colour=150,0,0,255>G</colour>-City</font>\n<font=ZCity_Tiny><colour=105,105,105>" .. gm .. "</colour></font>"
     return markup.Parse(text)
 end
 
-local color_red = Color(255,25,25,45)
+local color_red = Color(255,128,0,45)
 local clr_gray = Color(255,255,255,25)
 local clr_verygray = Color(10,10,19,235)
+local clr_cool = Color(255,50,50,40)
 
 function PANEL:Init()
     self:SetAlpha(0)
@@ -173,6 +175,45 @@ function PANEL:Init()
         self:AddSelect(lDock, v.Title, v)
     end
 
+    local mat = Material("vgui/happy2.png", "noclamp")
+
+    local emoji = vgui.Create("DButton", self)
+    emoji:SetPos(ScreenScale(105), ScrH() - ScrH()/1.41)
+    emoji:SetSize(ScreenScale(26), ScreenScaleH(40))
+    emoji:SetText("")
+
+    function emoji:Paint(w, h)
+        surface.SetMaterial(mat)
+        surface.SetDrawColor(255, 255, 255)
+        surface.DrawTexturedRectRotated(w / 2, h / 2, w, h, RealTime() * -40)
+    end
+
+    function emoji:DoClick()
+        surface.PlaySound("honk.mp3")
+    end
+
+    -- Define the chance (e.g., 20% chance)
+    local chance = 0.04
+
+    -- Generate a random number between 0 and 1
+    local roll = math.random()
+
+    -- Check if the roll meets the chance criteria
+    if roll < chance then
+        local image = vgui.Create("DImage", self)
+        image:SetSize(ScreenScale(26), ScreenScaleH(40))
+        image:SetPos(ScreenScale(105), ScrH() - ScrH()/1.41) -- Adjust based on title bar height
+        -- Replace with your actual image path
+        image:SetImage("vgui/smunk.png")
+    end   
+
+    --local honk = vgui.Create("DButton", self)
+    --honk:SetPos(ScreenScale(105), ScrH() - ScrH()/1.41)
+    --honk:SetSize(ScreenScale(26), ScreenScaleH(40))
+    
+    --function honk:DoClick()
+        --EmitSound("honk.mp3", )
+    --end
 
     local bottomDock = vgui.Create("DPanel", self)
     bottomDock:SetPos(ScreenScale(1), ScrH() - ScrH()/10)
@@ -182,20 +223,15 @@ function PANEL:Init()
     self.panelparrent:SetPos(bottomDock:GetWide()+bottomDock:GetX(), 0)
     self.panelparrent:SetSize(ScrW() - bottomDock:GetWide()*1, ScrH())
     self.panelparrent.Paint = function(this, w, h) end
-    
-    local git = vgui.Create("DLabel", bottomDock)
-    git:Dock(BOTTOM)
-    git:DockMargin(ScreenScale(10), 0, 0, 0)
-    git:SetFont("ZCity_Tiny")
-    git:SetTextColor(clr_gray)
-    git:SetText("GitHub: github.com/" .. hg.GitHub_ReposOwner .. "/" .. hg.GitHub_ReposName)
-    git:SetContentAlignment(4)
-    git:SetMouseInputEnabled(true)
-    git:SizeToContents()
 
-    function git:DoClick()
-        gui.OpenURL("https://github.com/" .. hg.GitHub_ReposOwner .. "/" .. hg.GitHub_ReposName)
-    end
+    --local bottomDock2 = vgui.Create("DPanel", self)
+    --bottomDock2:SetPos(ScreenScale(1), ScrH() - ScrH()/5.5)
+    --bottomDock2:SetSize(ScreenScale(400), ScreenScaleH(80))
+    --bottomDock2.Paint = function(this, w, h) end
+    --self.panelparrent = vgui.Create("DPanel", self)
+    --self.panelparrent:SetPos(bottomDock2:GetWide()+bottomDock2:GetX(), 0)
+    --self.panelparrent:SetSize(ScrW() - bottomDock2:GetWide()*1, ScrH())
+    --self.panelparrent.Paint = function(this, w, h) end
 
     local version = vgui.Create("DLabel", bottomDock)
     version:Dock(BOTTOM)
@@ -207,13 +243,13 @@ function PANEL:Init()
     version:SizeToContents()
 
     local zteam = vgui.Create("DLabel", bottomDock)
-    zteam:Dock(BOTTOM)
-    zteam:DockMargin(ScreenScale(10), 0, 0, 0)
     zteam:SetFont("ZCity_Tiny")
     zteam:SetTextColor(clr_gray)
-    zteam:SetText("Authors: uzelezz, Sadsalat, \nMr.Point, Zac90, Deka, Mannytko")
+    zteam:SetText("Credits: \n-john gambler(STEAM_0:0:617505497) for the custom weapon selector \n-Troyza for this menu and other stuff")
     zteam:SetContentAlignment(4)
     zteam:SizeToContents()
+    zteam:SetTall(150)
+    zteam:SetPos(ScreenScale(10), bottomDock:GetTall(150) - zteam:GetTall() - ScreenScale(0))   
 end
 
 function PANEL:First( ply )
@@ -224,7 +260,7 @@ local gradient_d = surface.GetTextureID("vgui/gradient-d")
 local gradient_r = surface.GetTextureID("vgui/gradient-u")
 local gradient_l = surface.GetTextureID("vgui/gradient-l")
 
-local clr_1 = Color(102,0,0,35)
+local clr_1 = Color(75,0,150,18)
 function PANEL:Paint(w,h)
     draw.RoundedBox( 0, 0, 0, w, h, self.ColorBG )
     hg.DrawBlur(self, 5)
