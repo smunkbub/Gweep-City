@@ -17,6 +17,9 @@ WS.LastSelectedSlotPos = 0
 WS.SelectedSlot = 0
 WS.SelectedSlotPos = 0
 
+local animHeights = {}
+local lerpScrollOffset = 0
+
 function WS.DrawText(text, font, posX, posY, color, textAlign)
     draw.DrawText( text, font, posX + 2, posY + 2, ColorAlpha(color_black,WS.Transparent*255) ,textAlign )
     draw.DrawText( text, font, posX, posY, ColorAlpha(color,WS.Transparent*255) ,textAlign )
@@ -48,91 +51,86 @@ end
 
 local scrW, scrH = ScrW(), ScrH()
 
-local AcsentColor = Color(155,0,0)
+local AcsentColor = Color(0,0,155)
 local gradient_u = Material("vgui/gradient-d")
 
 function WS.WeaponSelectorDraw( ply )
     if not IsValid( ply ) or not ply:Alive() or GetGlobalBool("RadialInventory", false) then return end
-    if WS.Show < CurTime() then 
-        WS.SelectedSlot = WS.LastSelectedSlot 
+
+    if WS.Show < CurTime() then
+        WS.SelectedSlot = WS.LastSelectedSlot
         WS.SelectedSlotPos = -1
-        
-        return 
+        WS.Transparent = Lerp(FrameTime() * 10, WS.Transparent, 0)
+        lerpScrollOffset = 0
+        return
     end
+
     local Weapons = WS.GetWeaponTable( ply )
     local SelectedWep = WS.GetSelectedWeapon()
     if not IsValid(SelectedWep) then return end
-    WS.Transparent = LerpFT( 0.2, WS.Transparent, math.min( WS.Show - CurTime(), 1 ) )
-    --draw.RoundedBox(0,(scrW / 2)-10,(scrH *0.15),20,20, color_red )
-    local SuperAmmout = 0
-    local AmmoutSlots = 0
+
+    WS.Transparent = Lerp(FrameTime() * 8, WS.Transparent, math.min(WS.Show - CurTime(), 1))
+    if WS.Transparent < 0.01 then return end
+
+    local AmmoutSlots, activeSlotIndex = 0, 0
     for i = 0, #Weapons do
-        local slotTbl = Weapons[i]
-        if table.Count(slotTbl) < 1 then continue end
+        if table.Count(Weapons[i]) < 1 then continue end
+        if WS.SelectedSlot == i then activeSlotIndex = AmmoutSlots end
         AmmoutSlots = AmmoutSlots + 1
     end
 
+    local sizeX = scrW * 0.1
+    local colW = sizeX + 8
 
+    local targetOffset = -((activeSlotIndex - AmmoutSlots / 2) * colW + sizeX / 2)
+    lerpScrollOffset = Lerp(FrameTime() * 9, lerpScrollOffset, targetOffset)
+
+    local SuperAmmout = 0
     for i = 0, #Weapons do
         local slotTbl = Weapons[i]
         if table.Count(slotTbl) < 1 then continue end
-        local sizeX = scrW*0.1
-        local position = scrW/2 + ( ( SuperAmmout -  (AmmoutSlots/2)) * sizeX )
-        
-        WS.DrawText( i+1, "HomigradFontMedium", position + sizeX/2, scrH*0.02, ColorAlpha(color_white,WS.Transparent*255) ,TEXT_ALIGN_CENTER )
-        
-        --  draw.RoundedBox(
-        --      1,
-        --      position,
-        --      (scrH *0.01),
-        --      sizeX,
-        --      (scrH *0.02), 
-        --      ColorAlpha(color_black,WS.Transparent*255) 
-        --  )
-        --if slotTbl and table.Count(slotTbl) < 0 then continue end
-        local Ammout = 0
-        local lastPos = 0
+
+        local position = scrW / 2 + (SuperAmmout - AmmoutSlots / 2) * colW + lerpScrollOffset
+
+        WS.DrawText( i + 1, "HomigradFontMedium", position + sizeX / 2, scrH * 0.02 + (1 - WS.Transparent) * 8, ColorAlpha(color_white, WS.Transparent * 255), TEXT_ALIGN_CENTER )
+
+        local curY = scrH * 0.05 + (1 - WS.Transparent) * 10
+
         for Id = 0, #slotTbl do
-            wepId = Id
-            local wep = slotTbl[wepId]
+            local wep = slotTbl[Id]
             if not wep then continue end
-            --print(wepId,wep)
-            local sizeH = SelectedWep == wep and (scrH *0.12) or (scrH *0.025)
-            local LastSelected = 0
-            if slotTbl[wepId-1] and SelectedWep == slotTbl[wepId-1] then
-                lastPos = (scrH *0.095) 
-            end
-            draw.RoundedBox(
-                0,
-                position,
-                (scrH * 0.025) * (Ammout) + (scrH * 0.05) + lastPos,
-                sizeX,
-                sizeH, 
-                ColorAlpha(color_black,WS.Transparent*205) 
-            )
-            draw.RoundedBox(
-                0,
-                position,
-                ((scrH * 0.025) * (Ammout) + (scrH * 0.05) + lastPos) + sizeH-2,
-                sizeX,
-                2, 
-                ColorAlpha(color_black,WS.Transparent*205) 
-            )
-            surface.SetDrawColor( 155, 0, 0, WS.Transparent*( SelectedWep == wep and 200 or 0 )  )
-            surface.SetMaterial( gradient_u )
-            surface.DrawTexturedRect( position, (scrH * 0.025) * (Ammout) + (scrH * 0.05) + lastPos, sizeX, sizeH )
+
+            local key = i .. "_" .. Id
+            local targetH = (SelectedWep == wep) and (scrH * 0.12) or (scrH * 0.025)
+            animHeights[key] = Lerp(FrameTime() * 12, animHeights[key] or targetH, targetH)
+            local sizeH = animHeights[key]
+
+            local renderY = curY
+
+            draw.RoundedBox(0, position, renderY, sizeX, sizeH, ColorAlpha(color_black, WS.Transparent * 205))
+            draw.RoundedBox(0, position, renderY + sizeH - 2, sizeX, 2, ColorAlpha(color_black, WS.Transparent * 205))
+
+            surface.SetDrawColor(25, 25, 155, WS.Transparent * (SelectedWep == wep and 200 or 0))
+            surface.SetMaterial(gradient_u)
+            surface.DrawTexturedRect(position, renderY, sizeX, sizeH)
+
             if SelectedWep == wep then
-                surface.SetDrawColor( 255, 0, 0, WS.Transparent*155 )
-	            surface.DrawOutlinedRect( position, (scrH * 0.025) * (Ammout) + (scrH * 0.05) + lastPos, sizeX, sizeH, 2 )
+                surface.SetDrawColor(25, 25, 255, WS.Transparent * 155)
+                surface.DrawOutlinedRect(position, renderY, sizeX, sizeH, 2)
             end
-            local sizeHi = (scrH *0.025) * (Ammout) + (scrH * 0.05) + lastPos
-            sizeHi = sizeHi + 2.5
-            WS.DrawText( WS.GetPrintName(wep), "HomigradFontSmall", position + sizeX/2, sizeHi, ColorAlpha(color_white,WS.Transparent*255) ,TEXT_ALIGN_CENTER )
-            Ammout = Ammout + 1
+
+            WS.DrawText(WS.GetPrintName(wep), "HomigradFontSmall", position + sizeX / 2, renderY + 2.5, ColorAlpha(color_white, WS.Transparent * 255), TEXT_ALIGN_CENTER)
 
             if SelectedWep == wep and wep.DrawWeaponSelection then
-                wep:DrawWeaponSelection(position + 5, (scrH * 0.025) * (Ammout) + (scrH * 0.055) + lastPos, sizeX - 10, sizeH, WS.Transparent*255)
+                local waveX = math.sin(CurTime() * 4.5) * 4
+                local waveY = math.cos(CurTime() * 3.5) * 3
+                local iconX = position + 12 + waveX
+                local iconY = renderY + (sizeH * 0.15) + waveY
+                local iconW = sizeX - 24 + math.sin(CurTime() * 2) * 2
+                wep:DrawWeaponSelection(iconX, iconY, iconW, sizeH * 0.55, WS.Transparent * 255)
             end
+
+            curY = curY + sizeH
         end
         SuperAmmout = SuperAmmout + 1
     end
