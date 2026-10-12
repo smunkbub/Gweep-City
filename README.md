@@ -2,6 +2,7 @@
 
 # Z-City
 
+# THIS SPECIFIC FORK OF Z-CITY IS ONLY INTENDED FOR THE GWEEP'S Z-CITY SERVER AND IS NOT INTENDED TO USE BY YOURSELF. SOME CONTENT ARE NOT PRESENT THIS FORK.
 [![GitHub License](https://img.shields.io/github/license/uzelezz123/Z-City)](LICENSE)
 [![Steam Subscriptions](https://img.shields.io/steam/subscriptions/3657285193)](https://steamcommunity.com/sharedfiles/filedetails/?id=3657285193)
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/uzelezz123/Z-City)]()
