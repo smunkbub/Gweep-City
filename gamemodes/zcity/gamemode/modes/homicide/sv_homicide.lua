@@ -285,7 +285,16 @@ MODE.Types.standard = {
 		ply:SetNetVar("Inventory",inv)
 	end,
 	GunManLoot = function(ply)
-		ply:Give("weapon_px4beretta")
+		local tbl = {
+			"weapon_px4beretta",
+			"weapon_m9beretta",
+			"weapon_browninghp"
+		}
+
+		local wpn = ply:Give(tbl[math.random(#tbl)])
+
+		ply:Give("weapon_bandage_sh")
+
 		ply.organism.recoilmul = 1
 	end,
 	PoliceTime = 220,
@@ -343,7 +352,7 @@ MODE.Types.wildwest = {
 		ply:Give("weapon_sogknife")
 		ply:Give("weapon_hg_type59_tpik")
 		ply:Give("weapon_adrenaline")
-		local revolver = ply:Give(math.random(2) == 2 and "weapon_winchester" or "weapon_revolver2")
+		local revolver = ply:Give(math.random(2) == 2 and "weapon_yellowboy" or "weapon_revolver2" and "weapon_doublebarrel")
 		ply:GiveAmmo(revolver:GetMaxClip1() * 1,revolver:GetPrimaryAmmoType(),true)
 		ply:Give("weapon_traitor_ied")
 		ply:Give("weapon_hg_molotov_tpik")
@@ -400,13 +409,13 @@ MODE.Types.wildwest = {
 			end)
 			if v.isTraitor then continue end
 			if v.isGunner then
-				v:Give("weapon_winchester")
+				v:Give("weapon_yellowboy")
 				v:Give("weapon_revolver357")
 				v:Give("weapon_handcuffs")
 				v:Give("weapon_handcuffs_key")
 			else
 				local guns = {
-					"weapon_winchester",
+					"weapon_yellowboy",
 					"weapon_revolver2",
 					"weapon_doublebarrel",
 					"weapon_doublebarrel_short"
@@ -488,8 +497,8 @@ MODE.Types.gunfreezone = {
 		ply:Give("weapon_traitor_poison_consumable")
 		ply:Give("weapon_traitor_suit")
 
-		local wep = ply:Give("weapon_zoraki")
-		timer.Simple(1,function() wep:ApplyAmmoChanges(2) end)
+		local wep = ply:Give("weapon_crossbowowo")
+		ply:GiveAmmo(wep:GetMaxClip1() * 20, wep:GetPrimaryAmmoType(), true)
 
 		ply.organism.stamina.range = 220
 
@@ -571,11 +580,20 @@ MODE.Types.soe = {
 		ply:SetNetVar("Inventory",inv)
 	end,
 	GunManLoot = function(ply)
-		local gun = ply:Give( ( math.random(1,2) > 1 and "weapon_remington870" ) or "weapon_kar98" )
+		local tbl = {
+			"weapon_kar98",
+			"weapon_remington870",
+			"weapon_m590a1",
+			"weapon_ruger",
+			"weapon_mosin"
+		}
+
+		local wpn = ply:Give(tbl[math.random(#tbl)])
+
+		ply:Give("weapon_bigbandage_sh")
+
 		ply.organism.recoilmul = 1.0
-		if gun:GetClass() == "weapon_kar98" then
-			hg.AddAttachmentForce(ply,gun,"optic12")
-		end
+
 		local inv = ply:GetNetVar("Inventory")
 		inv["Weapons"]["hg_sling"] = true
 		ply:SetNetVar("Inventory",inv)
